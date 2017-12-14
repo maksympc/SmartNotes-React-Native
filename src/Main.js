@@ -20,9 +20,9 @@ export default class Main extends Component {
         return (
             <Router>
                 <Scene key="root">
-                    <Scene key="Login" component={Login} title="Login" hideNavBar={true} initial/>
-                    <Scene key="Register" component={Register} title="Register" hideNavBar={true}/>
-                    <Scene key="Profile" component={Profile} title="Profile" hideNavBar={false}/>
+                    <Scene key="signIn" component={Login} title="Login" hideNavBar={true} initial/>
+                    <Scene key="signUp" component={Register} title="Register" hideNavBar={true}/>
+                    <Scene key="profile" component={Profile} title="Profile" hideNavBar={true}/>
                 </Scene>
             </Router>
         );

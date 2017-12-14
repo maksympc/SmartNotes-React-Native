@@ -30,12 +30,18 @@ export default class LoginForm extends Component {
         this.unsubscribe()
     }
 
-
     _signIn = () => {
-        firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.password).then(() => alert('SIGN IN is successful!'))
+        firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.password).then(() => {
+            alert('SIGN IN is successful!')
+            Actions.profile();
+        })
             .catch(error => alert(error.message));
     };
 
+    _signUp = () => {
+        alert('SING UP is pressed!');
+        Actions.signUp();
+    };
 
     render() {
         return (
@@ -69,7 +75,7 @@ export default class LoginForm extends Component {
 
                     <TouchableOpacity style={styles.buttonLastContainer}
                                       activeOpacity={0.5}
-                                      onPress={alert('SING UP is pressed!')}>
+                                      onPress={this._signUp.bind(this)}>
                         <Text style={styles.buttonText}>SIGN UP</Text>
                     </TouchableOpacity>
                 </View>
@@ -92,9 +98,11 @@ const styles = StyleSheet.create({
     },
     buttonFirstContainer: {
         padding: 10,
+        marginRight:10,
         height: 45,
-        width: screenWidth - 200,
-        backgroundColor: '#2980b9',
+        width: screenWidth - 210,
+        //backgroundColor: '#2980b9',
+        backgroundColor: 'rgba(255,255,255,0.6)',
         alignItems: 'center',
         justifyContent: 'center'
     },

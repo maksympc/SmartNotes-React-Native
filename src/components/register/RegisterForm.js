@@ -29,16 +29,22 @@ export default class RegisterForm extends Component {
         this.unsubscribe = firebase.auth().onAuthStateChanged(user => {
             if (user) {
                 // привязка к другому экрану, как только привязали пользователя!
-                Actions.Profile(user);
+                //            Actions.Profile(user);
             }
         });
     }
+
+    _signIn = () => {
+        alert('SIGN IN is pressed!');
+        Actions.pop();
+    };
 
     _signUp = () => {
         firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.password).then(() => {
             alert('SIGN UP is successful!');
             firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.password).then(() => {
                 alert('SIGN IN is successful!');
+                Actions.profile();
             })
                 .catch(error => alert(error.message)); // error when sign in
         })
@@ -92,7 +98,7 @@ export default class RegisterForm extends Component {
                 <View flexDirection='row'>
                     <TouchableOpacity style={styles.buttonLastContainer}
                                       activeOpacity={0.5}
-                                      onPress={alert('SIGN IN is pressed!')}>
+                                      onPress={this._signIn.bind(this)}>
                         <Text style={styles.buttonText}>SIGN IN</Text>
                     </TouchableOpacity>
 
@@ -124,8 +130,9 @@ const styles = StyleSheet.create({
     buttonFirstContainer: {
         padding: 10,
         height: 45,
-        width: screenWidth - 200,
-        backgroundColor: '#2980b9',
+        width: screenWidth - 210,
+        //backgroundColor: '#2980b9',
+        backgroundColor: 'rgba(255,255,255,0.6)',
         alignItems: 'center',
         justifyContent: 'center'
     },
@@ -133,6 +140,7 @@ const styles = StyleSheet.create({
         padding: 10,
         height: 45,
         width: 100,
+        marginRight: 10,
         backgroundColor: 'rgba(255,255,255,0.2)',
         alignItems: 'center',
         justifyContent: 'center'

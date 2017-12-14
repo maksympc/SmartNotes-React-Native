@@ -23,26 +23,26 @@ export default class Login extends Component {
     _signout() {
         firebase.auth().signOut().then(() => {
             alert('SIGN OUT successful!');
-            Actions.pop()
+            Actions.pop();
         }).catch((error) => alert(error.message));
     }
 
     render() {
-        firebase.auth().onAuthStateChanged(user => {
-            if (user) {
-                console.log(user.emailVerified);
-                alert('user.emailVerified: ' + user.emailVerified)
-            }
-        });
+        // firebase.auth().onAuthStateChanged(user => {
+        //     if (user) {
+        //         console.log(user.emailVerified);
+        //         alert('user.emailVerified: ' + user.emailVerified)
+        //     }
+        // });
 
         return (
             <View style={styles.container}>
-                <TouchableOpacity onPress={this._signout.bind(this)} style={styles.button}>
+                <TouchableOpacity style={styles.button}>
                     <Text>
+                        {/*//onPress={this._signout.bind(this)}*/}
                         SIGN OUT
                     </Text>
                 </TouchableOpacity>
-
             </View>
         )
     }
@@ -52,7 +52,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
-        padding: 10
+        padding: 10,
+        backgroundColor: '#3498db',
     },
     login: {
         justifyContent: 'center',
@@ -73,4 +74,4 @@ const styles = StyleSheet.create({
     btntext: {
         color: '#fff'
     }
-})
+});
