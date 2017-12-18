@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 
 import RegisterForm from './RegisterForm';
+import Logo from '../logo/Logo'
 
 export default class Register extends Component {
 
@@ -18,8 +19,7 @@ export default class Register extends Component {
             <KeyboardAvoidingView behavior='padding' style={styles.container}>
                 <StatusBar barStyle='light-content'/>
                 <View style={styles.logoContainer}>
-                    <Image source={require('../../../images/logo.png')} style={styles.logo}/>
-                    <Text style={styles.title}>SmartNotes: #Chat</Text>
+                    <Logo/>
                 </View>
                 <View style={styles.formContainer}>
                     <RegisterForm/>
@@ -36,26 +36,16 @@ const styles = StyleSheet.create({
         backgroundColor: '#3498db',
     },
     logoContainer: {
-        flex: 60,
+        flex: 50,
         alignItems: 'center',
         justifyContent: 'flex-end',
         paddingBottom: 10,
 
     },
-    logo: {
-        width: 230,
-        height: 230,
-    },
-    title: {
-        fontSize: 25,
-        color: 'white',
-        marginTop: 10,
-        opacity: 0.8,
-    },
     formContainer: {
-        flex: 40,
+        flex: 50,
         alignItems: 'center',
         justifyContent: 'center',
-        paddingBottom:10
+        paddingBottom: 10
     },
 });

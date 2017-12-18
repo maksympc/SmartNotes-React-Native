@@ -19,12 +19,15 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "email-validator": "^1.1.1",
     "expo": "^23.0.4",
     "firebase": "^4.8.0",
     "react": "16.0.0",
     "react-native": "0.50.3",
-    "react-native-gifted-chat": "^0.3.0",
+    "react-native-action-button": "^2.8.3",
+    "react-native-elements": "^0.18.5",
     "react-native-router-flux": "^4.0.0-beta.24",
+    "react-native-vector-icons": "^4.4.2",
     "redux": "^3.7.2"
   }
 }

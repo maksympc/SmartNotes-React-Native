@@ -7,7 +7,10 @@ import {
     TextInput,
     TouchableOpacity,
     Dimensions,
+    AsyncStorage
 } from 'react-native';
+import {EmailValidator} from 'email-validator';
+
 
 import firebase from "../../database/Firebase";
 import {Actions} from 'react-native-router-flux';
@@ -22,24 +25,50 @@ export default class LoginForm extends Component {
             email: '',
             password: '',
             loading: false,
+            backgroundEmailColor: whiteColor,
+            backgroundPasswordColor: whiteColor,
         }
     }
 
-    componentWillUnmount() {
-        // Add listener here
-        this.unsubscribe()
+    credentialsValidation() {
+        let validator = require("email-validator");
+        let errorMessage = ''
+        if (!validator.validate(this.state.email)) {
+            errorMessage += 'Please, input correct email address! ';
+        }
+        if (this.state.password.length < 6) {
+            errorMessage += 'Password must contains at least 6 symbols!';
+        }
+        if (errorMessage != '') {
+            alert(errorMessage);
+            return false;
+        }
+        return true;
     }
 
+
     _signIn = () => {
-        firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.password).then(() => {
+        if (!this.credentialsValidation()) {
+            return;
+        }
+        this.setState({
+            loading: true
+        });
+        firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.password).then((userData) => {
+            this.setState({
+                loading: false,
+            });
+            AsyncStorage.setItem('userData', JSON.stringify(userData));
             alert('SIGN IN is successful!')
             Actions.profile();
         })
-            .catch(error => alert(error.message));
+            .catch(error => {
+                this.setState({loading: false});
+                alert(error.message);
+            });
     };
 
     _signUp = () => {
-        alert('SING UP is pressed!');
         Actions.signUp();
     };
 
@@ -47,22 +76,39 @@ export default class LoginForm extends Component {
         return (
             <View style={styles.container}>
 
-                <TextInput style={styles.input}
-                           placeholder='email'
+                <TextInput style={[styles.input, {backgroundColor: this.state.backgroundEmailColor}]}
+                           placeholder='Email'
                            placeholderTextColor='rgba(255,255,255,0.7)'
                            returnKeyType='next'
                            keyboardType='email-address'
+                           onEndEditing={() => {
+                               let validator = require("email-validator");
+                               if (!validator.validate(this.state.email)) {
+                                   this.setState({backgroundEmailColor: notOkColor})
+                               } else {
+                                   this.setState({backgroundEmailColor: okColor})
+                               }
+                           }}
                            onSubmitEditing={() => this.passwordInput.focus()}
                            autoCapitalize='none'
                            autoCorrect={false}
-                           onChangeText={(email) => this.state.email = email}/>
+                           onChangeText={(email) => {
+                               this.state.email = email;
+                           }}/>
 
-                <TextInput style={styles.input}
-                           placeholder='password'
+                <TextInput style={[styles.input, {backgroundColor: this.state.backgroundPasswordColor}]}
+                           placeholder='Password'
                            keyboardType='default'
                            placeholderTextColor='rgba(255,255,255,0.7)'
                            returnKeyType='go'
                            secureTextEntry={true}
+                           onEndEditing={() => {
+                               if (this.state.password.length < 6) {
+                                   this.setState({backgroundPasswordColor: notOkColor})
+                               } else {
+                                   this.setState({backgroundPasswordColor: okColor})
+                               }
+                           }}
                            ref={(input) => this.passwordInput = input}
                            onChangeText={(password) => this.state.password = password}/>
 
@@ -70,13 +116,13 @@ export default class LoginForm extends Component {
                     <TouchableOpacity style={styles.buttonFirstContainer}
                                       activeOpacity={0.5}
                                       onPress={this._signIn.bind(this)}>
-                        <Text style={styles.buttonText}>SIGN IN</Text>
+                        <Text style={styles.buttonText}>{'SIGN IN'}</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.buttonLastContainer}
                                       activeOpacity={0.5}
                                       onPress={this._signUp.bind(this)}>
-                        <Text style={styles.buttonText}>SIGN UP</Text>
+                        <Text style={styles.buttonText}>{'SIGN UP'}</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -84,6 +130,10 @@ export default class LoginForm extends Component {
     }
 }
 
+
+const okColor = 'rgba(0, 255, 153, 0.7)';
+const notOkColor = 'rgba(255, 51, 51,0.8)';
+const whiteColor = 'rgba(255,255,255,0.2)';
 const styles = StyleSheet.create({
     container: {
         paddingBottom: 20,
@@ -92,17 +142,15 @@ const styles = StyleSheet.create({
         height: 45,
         width: screenWidth - 100,
         color: '#FFF',
-        backgroundColor: 'rgba(255,255,255,0.2)',
         marginBottom: 10,
         paddingHorizontal: 10,
     },
     buttonFirstContainer: {
         padding: 10,
-        marginRight:10,
+        marginRight: 10,
         height: 45,
         width: screenWidth - 210,
-        //backgroundColor: '#2980b9',
-        backgroundColor: 'rgba(255,255,255,0.6)',
+        backgroundColor: okColor,
         alignItems: 'center',
         justifyContent: 'center'
     },
@@ -110,7 +158,7 @@ const styles = StyleSheet.create({
         padding: 10,
         height: 45,
         width: 100,
-        backgroundColor: 'rgba(255,255,255,0.2)',
+        backgroundColor: whiteColor,
         alignItems: 'center',
         justifyContent: 'center'
     },
