@@ -1,12 +1,14 @@
 import React, {Component} from 'react';
 import {
-    AppRegistry,
     StyleSheet,
     Text,
     View,
     ListView,
     TouchableOpacity,
-    TextInput
+    TextInput,
+    Alert,
+    Dimensions,
+    Image
 } from 'react-native';
 
 import {Actions} from 'react-native-router-flux'
@@ -17,69 +19,91 @@ export default class Profile extends Component {
         super(props);
         this.state = {
             user: null,
-            loading: true,
+            loading: true
         }
     }
 
     componentWillMount() {
-        AsyncStorage.getItem('userData').then((user_data_json) => {
-            let userData = JSON.parse(user_data_json);
-            this.setState({
-                user: userData,
-                loading: false
-            });
-        }).catch((error) => {
-            alert(error.message)
-        });
+        this.setState({user: firebase.auth().currentUser});
+    }
+
+    componentDidMount() {
+        Alert.alert("Welcome!", "We are glad to see you here! Have a nice time!", {text: 'OK'});
     }
 
     _signout() {
-        AsyncStorage.removeItem('userData').then(() => {
-            this.props.firebaseApp.auth().signOut().then(() => {
-                alert('SIGN OUT successful!');
-                Actions.pop();
-            }).catch((error) => alert(error.message));
-        }).catch((error) => alert(error.message));
+        firebase.auth().signOut().catch((error) => alert(error.message));
+        Actions.pop();
     }
 
     render() {
         return (
             <View style={styles.container}>
-                <TouchableOpacity style={styles.button}>
-                    <Text>
-                        {/*//onPress={this._signout.bind(this)}*/}
-                        SIGN OUT
-                    </Text>
-                </TouchableOpacity>
+                <View flex={30} style={{backgroundColor: 'aquamarine'}}>
+                    <TouchableOpacity style={styles.buttonContainer} onPress={this._signout.bind(this)}>
+                        <Text style={styles.buttonText}>
+                            SIGN OUT
+                        </Text>
+                    </TouchableOpacity>
+                    <View flexDirection='row'>
+                        <View>
+                            <TouchableOpacity onPress={() => alert("Sorry, you can't change this IMAGE now!")}>
+                                <Image style={styles.profileImage} source={require('../../images/profile.png')}>
+                                </Image>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.textContainer}>
+                            <TouchableOpacity onPress={() => alert("Sorry, you can't change NAME now!")}>
+                                <Text style={styles.text}>Name:{this.state.user.name}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => alert("Sorry, you can't change this EMAIL now!")}>
+                                <Text style={styles.text}>Email:{this.state.user.email}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+                <View flex={70} style={{alignItems: 'center', justifyContent: 'center', backgroundColor: 'cyan'}}>
+                    <TouchableOpacity onPress={() => alert("Sorry, you can't add TASKS now!")}>
+                        <Text style={{fontSize: 50}}>Рабочая область</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         )
     }
 }
 
+
+let window = Dimensions.get("window");
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        padding: 10,
         backgroundColor: '#3498db',
     },
-    login: {
-        justifyContent: 'center',
-        alignItems: 'stretch',
-        height: 40,
-        marginTop: 20,
-        backgroundColor: '#DDDFD3',
-        padding: 10
-    },
-    button: {
+    buttonContainer: {
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#5FBD31',
+        backgroundColor: 'rgb(102, 0, 102)',
         height: 40,
         marginTop: 20,
 
     },
-    btntext: {
+    buttonText: {
         color: '#fff'
+    },
+    textContainer: {
+        height: 100,
+        width: window.width - 100,
+        backgroundColor: 'white',
+        opacity: 0.8
+    },
+    profileImage: {
+        width: 150,
+        height: 150,
+        backgroundColor: 'yellow'
+    },
+    text: {
+        paddingTop: 10,
+        fontWeight: "500",
+        fontSize: 30
     }
 });

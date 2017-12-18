@@ -1,12 +1,13 @@
 import React, {Component} from 'react';
 import {
     StyleSheet,
-    Image,
     View,
     Text,
     TextInput,
     TouchableOpacity,
     Dimensions,
+    ActivityIndicator, Platform,
+    Alert
 } from 'react-native';
 
 import firebase from "../../database/Firebase";
@@ -14,6 +15,7 @@ import {Actions} from 'react-native-router-flux';
 
 
 const screenWidth = Dimensions.get('window').width;
+
 export default class RegisterForm extends Component {
     constructor(props) {
         super(props);
@@ -21,26 +23,13 @@ export default class RegisterForm extends Component {
             email: '',
             password: '',
             repeatPassword: '',
+            error: '',
             loading: false,
             backgroundEmailColor: whiteColor,
             backgroundPasswordColor: whiteColor,
             backgroundRepeatPasswordColor: whiteColor,
         }
     }
-
-    componentWillMount() {
-        // Add listener here
-        this.unsubscribe = firebase.auth().onAuthStateChanged(user => {
-            if (user) {
-                // привязка к другому экрану, как только привязали пользователя!
-                //            Actions.Profile(user);
-            }
-        });
-    }
-
-    _signIn = () => {
-        Actions.pop();
-    };
 
     credentialsValidation() {
         let validator = require("email-validator");
@@ -65,56 +54,50 @@ export default class RegisterForm extends Component {
         return true;
     }
 
+    renderTextOrSpinner() {
+        if (this.state.loading) {
+            return <ActivityIndicator color='white' size='small'/>;
+        }
+        return <Text style={styles.buttonText}>{'SIGN UP'}</Text>
+    }
+
     _signUp = () => {
         if (!this.credentialsValidation()) {
             return;
         }
         this.setState({
-            // When waiting for the firebase server show the loading indicator.
-            loading: true
+            loading: true,
+            error: '',
         });
         firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.password).then(() => {
-            alert('SIGN UP is successful!');
             this.setState({
-                // Clear out the fields when the user logs in and hide the progress indicator.
                 email: '',
                 password: '',
                 loading: false
             });
-            firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.password).then(() => {
-                alert('SIGN IN is successful!');
-                Actions.profile();
-            })
-                .catch(error => {
-                    alert(error.message);
-                    this.setState({
-                        loading: false
-                    });
-                }); // error when sign in
-        })
-            .catch((error) => {
-                alert(error.message)
-                this.setState({
-                    loading: false
-                });
-            }); // error when sign up
-
+            Alert.alert(
+                "Congratulations!",
+                "You are successfully registered! Now, you can login with your credentials!",
+                {text: 'OK'},
+                {cancelable: false}
+            );
+            Actions.pop();
+        }).catch((error) => {
+            alert(error.message)
+            this.setState({
+                loading: false,
+                error: error.message
+            });
+        });
     };
 
-    componentDidMount() {
-        this.unsubscriber = firebase.auth().onAuthStateChanged((changedUser) => {
-            this.setState({user: changedUser});
-        })
-    }
-
-    componentWillUnmount() {
-        firebase.auth().signOut().then().catch((error) => alert(error.message));
-    }
+    _signIn = () => {
+        Actions.pop();
+    };
 
     render() {
         return (
             <View style={styles.container}>
-
                 <TextInput style={[styles.input, {backgroundColor: this.state.backgroundEmailColor}]}
                            placeholder='Email'
                            placeholderTextColor='rgba(255,255,255,0.7)'
@@ -154,7 +137,7 @@ export default class RegisterForm extends Component {
                            placeholder='Repeat password'
                            placeholderTextColor='rgba(255,255,255,0.7)'
                            keyboardType='default'
-                           returnKeyType='go'
+                           returnKeyType='done'
                            secureTextEntry={true}
                            ref={(input) => this.repeatPasswordInput = input}
                            onEndEditing={() => {
@@ -164,6 +147,7 @@ export default class RegisterForm extends Component {
                                    this.setState({backgroundRepeatPasswordColor: notOkColor})
                                }
                            }}
+                           onSubmitEditing={() => this._signUp.bind(this)}
                            onChangeText={(repeatPassword) => this.state.repeatPassword = repeatPassword}/>
 
                 <View flexDirection='row'>
@@ -176,11 +160,10 @@ export default class RegisterForm extends Component {
                     <TouchableOpacity style={styles.buttonFirstContainer}
                                       activeOpacity={0.5}
                                       onPress={this._signUp.bind(this)}>
-                        <Text style={styles.buttonText}>{'SIGN UP'}</Text>
+                        {this.renderTextOrSpinner()}
                     </TouchableOpacity>
 
                 </View>
-
             </View>
         );
     }
@@ -198,7 +181,6 @@ const styles = StyleSheet.create({
         height: 45,
         width: screenWidth - 100,
         color: '#FFF',
-        //  backgroundColor: whiteColor,
         marginBottom: 10,
         paddingHorizontal: 10,
     },
@@ -206,7 +188,6 @@ const styles = StyleSheet.create({
         padding: 10,
         height: 45,
         width: screenWidth - 210,
-        //backgroundColor: '#2980b9',
         backgroundColor: okColor,
         alignItems: 'center',
         justifyContent: 'center'
@@ -224,5 +205,5 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: '#FFF',
         fontWeight: '700'
-    },
+    }
 });

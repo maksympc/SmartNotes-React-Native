@@ -7,7 +7,8 @@ import {
     TextInput,
     TouchableOpacity,
     Dimensions,
-    AsyncStorage
+    AsyncStorage,
+    ActivityIndicator
 } from 'react-native';
 import {EmailValidator} from 'email-validator';
 
@@ -22,15 +23,18 @@ export default class LoginForm extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            user: null,
             email: '',
             password: '',
             loading: false,
+            error: '',
             backgroundEmailColor: whiteColor,
             backgroundPasswordColor: whiteColor,
         }
     }
 
     credentialsValidation() {
+
         let validator = require("email-validator");
         let errorMessage = ''
         if (!validator.validate(this.state.email)) {
@@ -46,36 +50,42 @@ export default class LoginForm extends Component {
         return true;
     }
 
+    renderTextOrSpinner() {
+        if (this.state.loading) {
+            return <ActivityIndicator color='white' size='small'/>;
+        }
+        return <Text style={styles.buttonText}>{'SIGN IN'}</Text>;
+    }
 
     _signIn = () => {
         if (!this.credentialsValidation()) {
             return;
         }
         this.setState({
-            loading: true
+            loading: true,
+            error: ''
         });
         firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.password).then((userData) => {
             this.setState({
+                error: '',
                 loading: false,
             });
-            AsyncStorage.setItem('userData', JSON.stringify(userData));
-            alert('SIGN IN is successful!')
             Actions.profile();
         })
             .catch(error => {
-                this.setState({loading: false});
+                this.setState({error: error.message, loading: false});
                 alert(error.message);
             });
     };
 
     _signUp = () => {
+        this.setState({password: '', backgroundPasswordColor: whiteColor, backgroundEmailColor: whiteColor,});
         Actions.signUp();
     };
 
     render() {
         return (
             <View style={styles.container}>
-
                 <TextInput style={[styles.input, {backgroundColor: this.state.backgroundEmailColor}]}
                            placeholder='Email'
                            placeholderTextColor='rgba(255,255,255,0.7)'
@@ -116,13 +126,13 @@ export default class LoginForm extends Component {
                     <TouchableOpacity style={styles.buttonFirstContainer}
                                       activeOpacity={0.5}
                                       onPress={this._signIn.bind(this)}>
-                        <Text style={styles.buttonText}>{'SIGN IN'}</Text>
+                        {this.renderTextOrSpinner()}
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.buttonLastContainer}
                                       activeOpacity={0.5}
                                       onPress={this._signUp.bind(this)}>
-                        <Text style={styles.buttonText}>{'SIGN UP'}</Text>
+                        <Text style={styles.buttonText}>SIGN UP</Text>
                     </TouchableOpacity>
                 </View>
             </View>
